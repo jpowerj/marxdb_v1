@@ -1,0 +1,12 @@
+node_modules/
+dist/
+*.env*
+.vercel
+.env
+marxdb.json
+mongo/.atkey
+mongo/.gkey
+mongo/.gkey_auto
+**/.gkey
+**/.gkey_auto
+.vercel

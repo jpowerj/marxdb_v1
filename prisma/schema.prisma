@@ -1,0 +1,131 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["referentialIntegrity"]
+}
+
+datasource db {
+  provider             = "mysql"
+  url                  = env("DATABASE_URL")
+  referentialIntegrity = "prisma"
+}
+
+enum Month {
+  JAN
+  FEB
+  MAR
+  APR
+  MAY
+  JUN
+  JUL
+  AUG
+  SEP
+  OCT
+  NOV
+  DEC
+}
+
+model Note {
+  id        String   @id @default(cuid())
+  title     String   @db.Text
+  body      String   @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// Glossary entries
+model Entinfo {
+  id        String      @id @default(cuid())
+  name      String      @db.Text
+  fullText  String      @db.Text
+  regRefs   Docinfo[]
+  chronRefs Eventinfo[]
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+}
+
+// Chronicle entries
+model Eventinfo {
+  id        String    @id @default(cuid())
+  title     String    @db.Text
+  glossRefs Entinfo[]
+  regRefs   Docinfo[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+// Register entries
+model Docinfo {
+  // Required
+  id          String @id @default(cuid())
+  title       String @db.Text
+  entryNum    Int      
+  regSection  String @db.Text
+  
+
+  // Optional
+  author      String? @db.Text
+  type        String? @db.Text
+  url         String? @db.Text
+
+  // The complete text of the entry
+  fullText    String   @db.Text @default("")
+
+  // Full (non-parsed) text fields, from the Draper book
+  dated         String? @db.Text
+  langOrig      String?
+  moreInfo      String? @db.Text
+  notes         String? @db.Text
+  published     String? @db.Text
+  reprint       String? @db.Text
+  source        String? @db.Text
+  translation   String? @db.Text
+  written       String? @db.Text
+  
+  // Other db references
+  chronRefs Eventinfo[]
+  glossRefs Entinfo[]
+
+  // [Parsed Dates:]
+  anyDate Boolean?
+
+  // Written dates: start
+  writingStartDate DateTime? @db.Date
+  writingStartApprox Boolean?
+
+  // Written dates: end
+  writingEndDate DateTime? @db.Date
+  writingEndApprox Boolean?
+  
+  // Manual date
+  manualDate DateTime? @db.Date
+  manualDateApprox Boolean?
+  
+  // Dated Dates
+  datedDate DateTime? @db.Date
+
+  // Published Dates
+  publishedDate DateTime? @db.Date
+  publishedDateApprox Boolean?
+  
+  // Combined Date
+  combinedDate DateTime? @db.Date
+  combinedDateApprox Boolean?
+
+  // [Titles:]
+  englishTitle String? @db.Text
+  frenchTitle  String? @db.Text
+  germanTitle  String? @db.Text
+  spanishTitle String? @db.Text
+  
+  // Booleans
+  cancelled  Boolean?
+  dubious    Boolean?
+  mInvolved  Boolean?
+  posthumous Boolean?
+  sampled    Boolean?
+  scraped    Boolean?
+  
+  // Meta
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

@@ -1,0 +1,14 @@
+diff --git a/node_modules/@material-table/core/dist/material-table.js b/node_modules/@material-table/core/dist/material-table.js
+index d36b472..1361037 100644
+--- a/node_modules/@material-table/core/dist/material-table.js
++++ b/node_modules/@material-table/core/dist/material-table.js
+@@ -825,7 +825,8 @@ var MaterialTable = /*#__PURE__*/function (_React$Component) {
+         }
+       }
+ 
+-      var count = this.isRemoteData() ? this.state.query.totalCount : this.state.data.length;
++      //var count = this.isRemoteData() ? this.state.query.totalCount : this.state.data.length;
++      var count = this.isRemoteData() ? this.state.query.totalCount : 10000;
+       var currentPage = this.isRemoteData() ? this.state.query.page : this.state.currentPage;
+       var pageSize = this.isRemoteData() ? this.state.query.pageSize : this.state.pageSize;
+ 
