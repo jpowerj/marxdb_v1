@@ -52,11 +52,6 @@ function getChronRefLink(chronRefId: string) {
     );
 }
 
-function getChronRefLinks(chronRefIds: string[]) {
-    let y = chronRefIds.map((item: string) => { return getChronRefLink(item)})
-    return y.join(", ")
-}
-
 export function EntryDetailsPanel(props: any) {
     let rowData = props.data;
     //console.log(rowData);
@@ -87,13 +82,13 @@ export function EntryDetailsPanel(props: any) {
                     <Tooltip title={tooltipText}>
                     <Chip
                       icon={<LinkIcon />}
-                      label={rowData.ent_id}
+                      label={rowData.entry_id}
                       variant="outlined"
                       className="float-right"
                       onMouseLeave={handleTooltipClose}
                       onClick={() => {
                         //alert('clicked');
-                        navigator.clipboard.writeText(`https://marxdb.com/reg/${rowData.ent_id}`).then(
+                        navigator.clipboard.writeText(`https://marxdb.com/reg/${rowData.entry_id}`).then(
                             function () {
                                 /* clipboard successfully set */
                                 console.log('Success! The text was copied to your clipboard');

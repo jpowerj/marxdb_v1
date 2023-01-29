@@ -9,4 +9,7 @@ mongo/.gkey
 mongo/.gkey_auto
 **/.gkey
 **/.gkey_auto
-.vercel
+gdrive/credentials.json
+gdrive/token.json
+**/credentials.json
+**/token.json

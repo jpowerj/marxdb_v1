@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../app/routes/at.tsx"],
+  "sourcesContent": ["import * as React from 'react';\nimport { Outlet, useLoaderData, useLocation } from \"@remix-run/react\";\n\nimport type { LoaderArgs } from \"@remix-run/node\";\n\nimport { getDocinfoAirtable, getDocinfoCount } from \"~/models/docinfo.server\";\nimport Typography from '@mui/material/Typography';\n\nexport async function loader({ request }: LoaderArgs) {\n  //const docinfoListItems = await getDocinfoAirtable(\"M0100\");\n  //console.log(\"[loader()] items: \" + docinfoListItems);\n  const docinfoCount = await getDocinfoCount();\n  return docinfoListItems;\n}\n\nexport default function RegPage() {\n  const reqData = useLoaderData();\n  //console.log(reqData);\n  return (\n    <Typography>\n      {Object.entries(reqData)}\n    </Typography>\n  );\n}\n"],
+  "mappings": ";;;;;;;;;;;;;;;;;;;;AAKA,qBAAoD;AACpD;AANA;AAee,SAAR,UAA2B;AAChC,QAAM,UAAU,cAAc;AAE9B,SACE,mDAAC;AAAA,IACE,iBAAO,QAAQ,OAAO;AAAA,KADzB;AAAA;AAAA;AAAA;AAAA,SAEA;AAEJ;",
+  "names": []
+}

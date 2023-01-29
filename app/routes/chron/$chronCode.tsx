@@ -158,15 +158,32 @@ export default function ChronTable() {
                 }
                 data={(query) =>
                     new Promise((resolve, reject) => {
-                        fetch(`/fetch/chron/10/${query.page}`)
-                            .then(response => response.json())
-                            .then(rsJson => {
-                                resolve({
-                                    data: rsJson.docs,
-                                    page: query.page,
-                                    totalCount: rsJson.total,
-                                })
-                            })
+                        console.log("[$chronCode.tsx] query:");
+                        console.log(query);
+                        console.log("query.search: " + query.search);
+                        if (query.search === "") {
+                            fetch(`/fetch/chron/10/${query.page}`)
+                                .then(response => response.json())
+                                .then(rsJson => {
+                                    resolve({
+                                        data: rsJson.docs,
+                                        page: query.page,
+                                        totalCount: rsJson.total,
+                                    })
+                                });
+                        } else {
+                            console.log("Querying");
+                            // Search query
+                            fetch(`/fetch/chron/search/${query.search}`)
+                                .then(response => response.json())
+                                .then(rsJson => {
+                                    resolve({
+                                        data: rsJson.docs,
+                                        page: query.page,
+                                        totalCount: rsJson.total,
+                                    })
+                                });
+                        }
                     })
                 }
                 components={{

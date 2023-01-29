@@ -59,17 +59,31 @@ export default function RegTable() {
     }
     // Otherwise, reqData.type === "auth", and we can get the auth name
     const authName = reqData.authName;
+    const [lastAuth, setLastAuth] = React.useState(authName);
     const location = useLocation();
     console.log("[$regCode] location.pathname: " + location.pathname);
     const tableRef = React.createRef<any>();
     React.useEffect(() => {
         tableRef.current && tableRef.current.onQueryChange();
+        tableRef.current && tableRef.current.onPageChange({}, 0);
         console.log("[useEffect()] location.pathname: " + location.pathname)
-    }, [location.pathname])
+    }, [location.pathname]);
+   /*
+   React.useEffect(() => {
+    if (!pageReset) {
+        console.log("effect");
+        console.log(tableRef.current);
+        tableRef.current.onPageChange({}, 0);
+        setPageReset(true);
+    }
+   }, []);
+   */
     const data_cols = [
-        { field: "ent_id", title: "ID", width: "60px" },
-        { field: "title", title: "Title", cellStyle: {width: '80%'}, headerStyle: {width: '80%'} },
-        { field: "year_combined", title: "Year", width: "60px" },
+        { field: "entry_id", title: "ID", width: "60px" },
+        { field: "title", title: "Title", cellStyle: {width: '60%'}, headerStyle: {width: '60%'} },
+        { field: "day_combined", title: "Day", cellStyle: {textAlign: 'right'}, headerStyle: {textAlign: 'right', width: "50px"}, width: "50px", maxWidth: "50px"},
+        { field: "month_combined", title: "Month", width: "50px", maxWidth: "50px", cellStyle: {textAlign: 'center'}, headerStyle: {textAlign: 'center'}},
+        { field: "year_final", title: "Year", width: "70px", maxWidth: "70px", minWidth: "70px", headerStyle: {textAlign: 'center'}, cellStyle: {textAlign: 'center'} },
     ];
     // MaterialTable documentation:
     // Orig: https://material-table.com/#/
@@ -80,8 +94,8 @@ export default function RegTable() {
         <TableContainer component={Paper}>
             <MaterialTable
                 title={
-                    <div>
-                    <RadioGroup row={true} value={authName}>
+                    <div className="font-bold">
+                        <RadioGroup row={true} value={authName}>
                             <NavLink to="../marx"><FormControlLabel control={<Radio />} label="Marx" value="marx" /></NavLink>
                             <NavLink to="../engels"><FormControlLabel control={<Radio />} label="Engels" value="engels" /></NavLink>
                             <NavLink to="../me"><FormControlLabel control={<Radio />} label="Marx-Engels" value="me" /></NavLink>
@@ -100,7 +114,7 @@ export default function RegTable() {
                     initialPage: 0,
                     draggable: false,
                     toolbar: true,
-                    //sorting: false,
+                    sorting: false,
                     paginationType: 'stepped',
                     numberOfPagesAround: 4
                 }}
@@ -112,12 +126,18 @@ export default function RegTable() {
                 data={(query) =>
                     new Promise((resolve, reject) => {
                         console.log("Fetching: " + authName);
-                        fetch(`/fetch/reg/${authName}/10/${query.page}`)
+                        let queryPage = query.page;
+                        if (authName !== lastAuth) {
+                            console.log("Changing authors");
+                            queryPage = 0;
+                            setLastAuth(authName);
+                        }
+                        fetch(`/fetch/reg/${authName}/10/${queryPage}`)
                             .then(response => response.json())
                             .then(rsJson => {
                                 resolve({
                                     data: rsJson.docs,
-                                    page: query.page,
+                                    page: queryPage,
                                     totalCount: rsJson.total,
                                 })
                             })
@@ -125,7 +145,7 @@ export default function RegTable() {
                 }
                 components={{
                     Cell: (props) => (
-                        <MTableCell className="overflow-hidden text-ellipsis whitespace-nowrap max-w-[550px]" {...props} />
+                        <MTableCell className="overflow-hidden text-ellipsis whitespace-nowrap max-w-[450px]" {...props} />
                     ),
                     Container: (props) => (
                         <Paper className="even:[&>*]:grow" sx={{ display: 'flex', flexDirection: 'column', height: '100%', maxHeight: '100%' }} elevation={1} {...props} />
@@ -148,7 +168,7 @@ export default function RegTable() {
                         onClick: (event, rowData) => {
                             //const rowJson = JSON.stringify(rowData, null, 2);
                             //alert(`Do save operation : ${rowJson}`);
-                            openInNewTab(`./${rowData.ent_id}`)
+                            openInNewTab(`./${rowData.entry_id}`)
                         },
                     },
                     {
@@ -158,7 +178,7 @@ export default function RegTable() {
                         tooltip: "View Full Text",
                         onClick: (event, rowData) => {
                             console.log("fulltext");
-                            openInNewTab(`./${rowData.ent_id}/fulltext`)
+                            openInNewTab(`./${rowData.entry_id}/fulltext`)
                         }
                     }
                 ]}

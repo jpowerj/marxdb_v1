@@ -1,4 +1,9 @@
 const axios = require('axios');
+const { MongoClient } = require("mongodb");
+// Connection URI
+const mongoUri = "mongodb+srv://admin:" + process.env.MONGO_ADMIN_PW + "@cluster0.cg6nz.mongodb.net/test";
+// Create a new MongoClient
+const client = new MongoClient(mongoUri);
 
 function genConfig(data: any, action: string) {
     return {
@@ -91,4 +96,40 @@ export async function getEvent(chronCode: string) {
     console.log("[getEvent] returning " + docResult);
     docResult = addMonthday(docResult);
     return docResult;
+}
+
+export async function searchEvents(query: string) {
+    await client.connect();
+    const coll = client.db("marxdb").collection("chronicle");
+    //const mongoQuery = { $text: { '$search': "Paris" } };
+    const mongoQuery = { $text: {'$search': query }};
+    console.log("mongoQuery: " + JSON.stringify(mongoQuery));
+    // Establish and verify connection
+    //const result = await client.db("admin").command({ ping: 1 });
+    //console.log("result: " + JSON.stringify(result));
+    // Ensures that the client will close when you finish/error
+    //const blankResult = await db.collection("chronicle").find({}).count();
+    //console.log("blankResult: " + blankResult);
+    const projection = {
+        _id: 1,
+        text: 1,
+    };
+    let cursorFull = coll.find(mongoQuery);
+    let totalCount = await cursorFull.count();
+    const limit = 10;
+    const sort = {
+        'entry_id': 1
+    };
+    let cursorLimited = coll.find(mongoQuery, { sort, limit });
+    let results = await cursorLimited.toArray();
+    //console.log("[getEvent] results = " + JSON.stringify(results));
+    //console.log("[getEvent] entries = " + Object.keys(entries.data));
+    //docResult = addMonthday(docResult);
+    await client.close();
+    //return docResult;
+    return {
+        documents: results,
+        showCount: limit,
+        totalCount: totalCount
+    };
 }

@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../app/routes/at.tsx"],
+  "sourcesContent": ["import * as React from 'react';\nimport { Outlet, useLoaderData, useLocation } from \"@remix-run/react\";\n\nimport type { LoaderArgs } from \"@remix-run/node\";\n\nimport { getDocinfo, getDocinfoCount, getDocinfoPageAirtable } from \"~/models/docinfo.server\";\nimport Typography from '@mui/material/Typography';\n\nexport async function loader({ request }: LoaderArgs) {\n  //const docinfoListItems = await getDocinfoAirtable(\"M0100\");\n  //const docinfoCount = await getDocinfoCount();\n  const docinfoPage = await getDocinfoPageAirtable(\"marx\", 10, 0);\n  return docinfoPage;\n}\n\nexport default function RegPage() {\n  const reqData = useLoaderData();\n  //console.log(reqData);\n  return (\n    <div>\n      <ul>\n      {reqData.map((x: any) => {\n        return <li>{x}</li>\n      })}\n      </ul>\n    </div>\n  );\n}\n"],
+  "mappings": ";;;;;;;;;;;;;;AAKA,qBAAoE;AALpE;AAee,SAAR,UAA2B;AAChC,QAAM,UAAU,cAAc;AAE9B,SACE,mDAAC;AAAA,IACC,6DAAC;AAAA,MACA,kBAAQ,IAAI,CAAC,MAAW;AACvB,eAAO,mDAAC;AAAA,UAAI;AAAA,WAAL;AAAA;AAAA;AAAA;AAAA,eAAO;AAAA,MAChB,CAAC;AAAA,OAHD;AAAA;AAAA;AAAA;AAAA,WAIA;AAAA,KALF;AAAA;AAAA;AAAA;AAAA,SAMA;AAEJ;",
+  "names": []
+}

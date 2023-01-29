@@ -28,8 +28,8 @@ export async function loader({ request, params }: LoaderArgs) {
     invariant(params.regCode, "Expected params.regCode");
     console.log("[$regCode.fulltext] params.regCode: " + params.regCode);
     // Fetch from DB
-    let entryFulltext = await getFulltext(params.regCode);
-    return entryFulltext;
+    let fulltextData = await getFulltext(params.regCode);
+    return fulltextData;
 }
 
 const openInNewTab = (url: string) => {
@@ -67,7 +67,7 @@ function FulltextPanel(props: any) {
         >
             <Box sx={{ margin: 1 }}>
                 <Typography variant="h6" gutterBottom component="div">
-                    {reqData.ent_id}: {reqData.title}
+                    {reqData.entry_id}: {reqData.title}
                     {(Object.keys(reqData).indexOf("fulltext") > -1) &&
                     <Tooltip title={tooltipText}>
                         <Chip
