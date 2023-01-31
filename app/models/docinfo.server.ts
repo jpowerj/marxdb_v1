@@ -124,29 +124,55 @@ function authNameToRegSection(authName: string): string {
   return regSectionDict[authName];
 }
 
+let airtableData: {[key: string]: any} = {};
+let airtableTotals: {[key: string]: number} = {};
 export async function getDocinfoPageAirtable(
   authName: string, perPage: number, pageNum: number
 ) {
-  // Start num for the author
-  let authStartNum = getSectionEntryNum(authName);
-  // Compute the section entry_num
-  let sectionEntryNum = perPage * pageNum;
-  // So add them to get the overall num
-  let startEntryNum = authStartNum + sectionEntryNum;
-  let results = await atBase(regBaseName).select({
-    view: 'all_grid',
-    filterByFormula: "{entry_num} >= " + startEntryNum,
-    maxRecords: perPage
-  }).all();
-  // But, we need to extract just the "fields" attribute from each
-  let resultsFields = results.map((x: any) => x.fields);
-  let regSection = authNameToRegSection(authName);
-  let totalFound = await getDocinfoPageTotalAirtable(regSection);
-  return {
-    showCount: results.length,
-    totalCount: totalFound,
-    documents: resultsFields
-  };
+  console.log("[docinfo.server] authName=" + authName + " perPage=" + perPage + " pageNum=" + pageNum);
+  let gridName = authNameToRegSection(authName).toLowerCase();
+  if (gridName in airtableData) {
+    console.log("Using cached data");
+    // Use cached data
+    let gridData = airtableData[gridName];
+    let resultsFields = gridData.map((x: any) => x.fields);
+    let totalFound = airtableTotals[gridName];
+    // Now return the range requested
+    let startIndex = pageNum * perPage;
+    let endIndex = (pageNum + 1) * perPage;
+    let requestedData = resultsFields.slice(startIndex, endIndex);
+    return {
+      showCount: gridData.length,
+      totalCount: totalFound,
+      documents: requestedData
+    };
+  } else {
+    // For debugging
+    //perPage = 100;
+    let authView = gridName + "_grid";
+    let results = await atBase(regBaseName).select({
+      view: authView,
+      //filterByFormula: "{entry_num} >= " + startEntryNum,
+      //maxRecords: perPage
+    }).all();
+    //console.log("[docinfo.server] " + Object.getOwnPropertyNames(results));
+    airtableData[gridName] = results;
+    // But, we need to extract just the "fields" attribute from each
+    let resultsFields = results.map((x: any) => x.fields);
+    let regSection = authNameToRegSection(authName);
+    let totalFound = await getDocinfoPageTotalAirtable(regSection);
+    airtableTotals[gridName] = totalFound;
+    // Now save the full data to the cache, and only return the current
+    // page for now
+    let startIndex = pageNum * perPage;
+    let endIndex = (pageNum + 1) * perPage;
+    let requestedData = resultsFields.slice(startIndex, endIndex);
+    return {
+      showCount: results.length,
+      totalCount: totalFound,
+      documents: requestedData
+    };
+  }
 }
 
 export async function getDocinfoPageMongo(authName: string, perPage: number, pageNum: number) {

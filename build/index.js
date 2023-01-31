@@ -62,7 +62,7 @@ __export(root_exports, {
 var import_react2 = require("@remix-run/react"), import_styles = require("@mui/material/styles");
 
 // app/styles/tailwind.css
-var tailwind_default = "/build/_assets/tailwind-PEVBXH4L.css";
+var tailwind_default = "/build/_assets/tailwind-OCESLDPU.css";
 
 // app/root.tsx
 var React = __toESM(require("react")), import_styles2 = require("@mui/material/styles"), import_AppBar = __toESM(require("@mui/material/AppBar")), import_Box = __toESM(require("@mui/material/Box")), import_CssBaseline = __toESM(require("@mui/material/CssBaseline")), import_GitHub = __toESM(require("@mui/icons-material/GitHub")), import_Drawer = __toESM(require("@mui/material/Drawer")), import_IconButton = __toESM(require("@mui/material/IconButton")), import_Menu = __toESM(require("@mui/icons-material/Menu")), import_Toolbar = __toESM(require("@mui/material/Toolbar")), import_Typography = __toESM(require("@mui/material/Typography")), import_jsx_dev_runtime = require("react/jsx-dev-runtime"), robotoUrl = "https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap", links = () => [
@@ -545,9 +545,6 @@ var import_tiny_invariant = __toESM(require("tiny-invariant"));
 
 // app/models/docinfo.server.ts
 var axios = require("axios"), whichDB = process.env.WHICH_DB, whichFulltext = process.env.WHICH_FULLTEXT, Airtable = require("airtable"), atBaseKey = "appnZn2NYRxLtEvsT", atBase = new Airtable({ apiKey: process.env.AIRTABLE_API_KEY }).base(atBaseKey), regBaseName = "M00_Register", fs = require("fs").promises, { authenticate } = require("@google-cloud/local-auth"), { google } = require("googleapis"), path = require("path");
-function getSectionEntryNum(auth) {
-  return auth === "engels" ? 0 : auth === "marx" ? 961 : auth === "me" ? 1982 : 2174;
-}
 function genConfig(data, action) {
   return {
     method: "post",
@@ -616,17 +613,32 @@ var regSectionDict = {
 function authNameToRegSection(authName) {
   return regSectionDict[authName];
 }
+var airtableData = {}, airtableTotals = {};
 async function getDocinfoPageAirtable(authName, perPage, pageNum) {
-  let authStartNum = getSectionEntryNum(authName), sectionEntryNum = perPage * pageNum, startEntryNum = authStartNum + sectionEntryNum, results = await atBase(regBaseName).select({
-    view: "all_grid",
-    filterByFormula: "{entry_num} >= " + startEntryNum,
-    maxRecords: perPage
-  }).all(), resultsFields = results.map((x) => x.fields), regSection = authNameToRegSection(authName), totalFound = await getDocinfoPageTotalAirtable(regSection);
-  return {
-    showCount: results.length,
-    totalCount: totalFound,
-    documents: resultsFields
-  };
+  console.log("[docinfo.server] authName=" + authName + " perPage=" + perPage + " pageNum=" + pageNum);
+  let gridName = authNameToRegSection(authName).toLowerCase();
+  if (gridName in airtableData) {
+    console.log("Using cached data");
+    let gridData = airtableData[gridName], resultsFields = gridData.map((x) => x.fields), totalFound = airtableTotals[gridName], startIndex = pageNum * perPage, endIndex = (pageNum + 1) * perPage, requestedData = resultsFields.slice(startIndex, endIndex);
+    return {
+      showCount: gridData.length,
+      totalCount: totalFound,
+      documents: requestedData
+    };
+  } else {
+    let authView = gridName + "_grid", results = await atBase(regBaseName).select({
+      view: authView
+    }).all();
+    airtableData[gridName] = results;
+    let resultsFields = results.map((x) => x.fields), regSection = authNameToRegSection(authName), totalFound = await getDocinfoPageTotalAirtable(regSection);
+    airtableTotals[gridName] = totalFound;
+    let startIndex = pageNum * perPage, endIndex = (pageNum + 1) * perPage, requestedData = resultsFields.slice(startIndex, endIndex);
+    return {
+      showCount: results.length,
+      totalCount: totalFound,
+      documents: requestedData
+    };
+  }
 }
 async function getDocinfoPageMongo(authName, perPage, pageNum) {
   var _a, _b, _c;
